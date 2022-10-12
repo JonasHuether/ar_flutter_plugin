@@ -13,15 +13,15 @@ import 'package:ar_flutter_plugin/models/ar_hittest_result.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 class ScreenshotWidget extends StatefulWidget {
-  const ScreenshotWidget({Key key}) : super(key: key);
+  const ScreenshotWidget({Key? key}) : super(key: key);
   @override
   _ScreenshotWidgetState createState() => _ScreenshotWidgetState();
 }
 
 class _ScreenshotWidgetState extends State<ScreenshotWidget> {
-  ARSessionManager arSessionManager;
-  ARObjectManager arObjectManager;
-  ARAnchorManager arAnchorManager;
+  late ARSessionManager arSessionManager;
+  late ARObjectManager arObjectManager;
+  late ARAnchorManager arAnchorManager;
 
   List<ARNode> nodes = [];
   List<ARAnchor> anchors = [];
@@ -113,13 +113,13 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
   }
 
   Future<void> onPlaneOrPointTapped(
-      List<ARHitTestResult> hitTestResults) async {
+      List<ARHitTestResult?> hitTestResults) async {
     var singleHitTestResult = hitTestResults.firstWhere(
         (hitTestResult) => hitTestResult?.type == ARHitTestResultType.plane);
     if (singleHitTestResult != null) {
       var newAnchor =
           ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
-      bool didAddAnchor = await arAnchorManager.addAnchor(newAnchor);
+      bool? didAddAnchor = await arAnchorManager.addAnchor(newAnchor);
       if (didAddAnchor != null && didAddAnchor) {
         anchors.add(newAnchor);
         // Add note to anchor
@@ -130,7 +130,7 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
             scale: Vector3(0.2, 0.2, 0.2),
             position: Vector3(0.0, 0.0, 0.0),
             rotation: Vector4(1.0, 0.0, 0.0, 0.0));
-        bool didAddNodeToAnchor =
+        bool? didAddNodeToAnchor =
             await arObjectManager.addNode(newNode, planeAnchor: newAnchor);
         
         if (didAddNodeToAnchor != null && didAddNodeToAnchor) {

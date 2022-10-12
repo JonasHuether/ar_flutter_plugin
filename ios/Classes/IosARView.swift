@@ -4,7 +4,6 @@ import Foundation
 import ARKit
 import Combine
 import ARCoreCloudAnchors
-import AVFoundation
 
 class IosARView: NSObject, FlutterPlatformView, ARSCNViewDelegate, UIGestureRecognizerDelegate, ARSessionDelegate {
     let sceneView: ARSCNView
@@ -23,12 +22,6 @@ class IosARView: NSObject, FlutterPlatformView, ARSCNViewDelegate, UIGestureReco
     private var cloudAnchorHandler: CloudAnchorHandler? = nil
     private var arcoreSession: GARSession? = nil
     private var arcoreMode: Bool = false
-    
-    // MARK: -- Depth properties
-    private var arDepthModeAvailable: Bool = false
-    private let arDepthHelper = DepthDataProcessingHelper()
-    
-    // MARK: -- Configurations
     private var configuration: ARWorldTrackingConfiguration!
     private var tappedPlaneAnchorAlignment = ARPlaneAnchor.Alignment.horizontal // default alignment
     
@@ -72,15 +65,12 @@ class IosARView: NSObject, FlutterPlatformView, ARSCNViewDelegate, UIGestureReco
     }
 
     func onDispose(_ result:FlutterResult) {
-        sceneView.session.pause()
-        
-        arDepthHelper.stopSession()
-        
-        self.sessionManagerChannel.setMethodCallHandler(nil)
-        self.objectManagerChannel.setMethodCallHandler(nil)
-        self.anchorManagerChannel.setMethodCallHandler(nil)
-        result(nil)
-    }
+                sceneView.session.pause()
+                self.sessionManagerChannel.setMethodCallHandler(nil)
+                self.objectManagerChannel.setMethodCallHandler(nil)
+                self.anchorManagerChannel.setMethodCallHandler(nil)
+                result(nil)
+            }
 
     func onSessionMethodCalled(_ call :FlutterMethodCall, _ result:FlutterResult) {
         let arguments = call.arguments as? Dictionary<String, Any>
@@ -242,18 +232,18 @@ class IosARView: NSObject, FlutterPlatformView, ARSCNViewDelegate, UIGestureReco
         self.configuration = ARWorldTrackingConfiguration()
         if let planeDetectionConfig = arguments["planeDetectionConfig"] as? Int {
             switch planeDetectionConfig {
-                case 1:
+                case 1: 
                     configuration.planeDetection = .horizontal
                 
-                case 2:
+                case 2: 
                     if #available(iOS 11.3, *) {
                         configuration.planeDetection = .vertical
                     }
-                case 3:
+                case 3: 
                     if #available(iOS 11.3, *) {
                         configuration.planeDetection = [.horizontal, .vertical]
                     }
-                default:
+                default: 
                     configuration.planeDetection = []
             }
         }
@@ -345,43 +335,13 @@ class IosARView: NSObject, FlutterPlatformView, ARSCNViewDelegate, UIGestureReco
                 }
             }
         }
+    
         // Update session configuration
         self.sceneView.session.run(configuration)
-        
-        if let configArDepth = arguments["handleDepth"] as? Bool {
-            if (configArDepth) {
-                /// setup overlay depth view on top of the sceneView
-                if sceneView.superview != nil {
-                    sceneView.addSubview(arDepthHelper.depthCoverImageView)
-                    arDepthHelper.depthCoverImageView.autoresizingMask = [
-                        .flexibleWidth, .flexibleHeight
-                    ]
-                    /// Check the LiDAR sensor support
-                    if #available(iOS 14.0, *) {
-                        if type(of: configuration).supportsFrameSemantics(.smoothedSceneDepth) {
-                            configuration.frameSemantics = .smoothedSceneDepth
-                            self.sceneView.session.run(configuration)
-                            arDepthModeAvailable = true
-                        } else {
-                            print("LiDAR sensor not supported on this device. AVDepthData will use AVSession")
-                            arDepthModeAvailable = false
-                            self.sceneView.session.pause()
-                            arDepthHelper.configureCaptureSession()
-//                            arDepthHelper.captureSession.startRunning()
-                        }
-                    } else {
-                        print("LiDAR sensor not supported on this device. AVDepthData will try to use AVSession data")
-                        arDepthModeAvailable = false
-                        self.sceneView.session.pause()
-                        arDepthHelper.configureCaptureSession()
-//                        arDepthHelper.captureSession.startRunning()
-                    }
-                }
-            }
-        }
     }
 
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        
         if let planeAnchor = anchor as? ARPlaneAnchor{
             let plane = modelBuilder.makePlane(anchor: planeAnchor, flutterAssetFile: customPlaneTexturePath)
             trackedPlanes[anchor.identifier] = (node, plane)
@@ -409,10 +369,6 @@ class IosARView: NSObject, FlutterPlatformView, ARSCNViewDelegate, UIGestureReco
             } catch {
                 print(error)
             }
-        }
-        
-        if arDepthModeAvailable {
-            arDepthHelper.colorDepth(frame: frame, sceneView: sceneView)
         }
     }
 
