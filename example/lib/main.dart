@@ -9,6 +9,7 @@ import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
 import 'package:ar_flutter_plugin_example/examples/cloudanchorexample.dart';
 import 'package:ar_flutter_plugin_example/examples/localandwebobjectsexample.dart';
 import 'package:ar_flutter_plugin_example/examples/debugoptionsexample.dart';
+import 'package:ar_flutter_plugin_example/examples/deptharexample.dart';
 
 import 'examples/objectgesturesexample.dart';
 import 'examples/screenshotexample.dart';
@@ -117,7 +118,14 @@ class ExampleList extends StatelessWidget {
           () => Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => ExternalModelManagementWidget())))
+                  builder: (context) => ExternalModelManagementWidget()))),
+       Example(
+          'Depth in Augmented Reality',
+          'Show the depth of the scene',
+          () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => DepthARWidget())))
     ];
     return ListView(
       children:
